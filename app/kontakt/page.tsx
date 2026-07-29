@@ -622,7 +622,10 @@ export default function ContactForm() {
                   isSubmitting={isSubmitting}
                   statusMessage={statusMessage}
                   statusType={statusType}
-                  onChange={handleChange}
+                  onChange={handleChange
+
+                    
+                  }
                   onSubmit={handleSubmit}
                 />
               </div>
