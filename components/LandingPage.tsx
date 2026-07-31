@@ -1363,7 +1363,7 @@ export default function LandingPage() {
                       </div>
                       <div className="w-16 h-16 mx-auto bg-teal-500 rounded-full flex items-center justify-center shadow-md">
                         <span className="text-white font-black text-sm">
-                          99.9%
+                          99.99%
                         </span>
                       </div>
                     </div>

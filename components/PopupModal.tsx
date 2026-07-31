@@ -1,16 +1,25 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
-import { X, Zap, ArrowRight, Shield, Clock, CheckCircle2 } from "lucide-react";
+import {
+  X,
+  Zap,
+  ArrowRight,
+  Shield,
+  Clock3,
+  CheckCircle2,
+  Sparkles,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const POPUP_KEY = "promo_popup_dismissed";
+const POPUP_KEY = "promo_popup_dismissed_v2";
 
 const BENEFITS = [
-  "Professional custom website tailored to your business",
-  "Delivered fast, with clear communication throughout",
-  "Responsive, modern, and performance-focused build",
-  "Support included after launch so you're not left alone",
+  "A custom website designed to make your business look credible",
+  "Fast delivery with direct communication and zero confusion",
+  "Mobile-first, modern, fast-loading, and conversion-focused",
+  "Support after launch so your site stays polished and reliable",
 ];
 
 export default function PromoPopup() {
@@ -37,7 +46,7 @@ export default function PromoPopup() {
     window.setTimeout(() => {
       setVisible(false);
       window.localStorage.setItem(POPUP_KEY, "true");
-    }, 350);
+    }, 360);
   };
 
   if (!visible) return null;
@@ -46,91 +55,103 @@ export default function PromoPopup() {
     <>
       <div
         onClick={handleClose}
-        className="fixed inset-0 z-50 bg-black/45 backdrop-blur-sm transition-opacity duration-300"
+        className="fixed inset-0 z-50 bg-black/55 backdrop-blur-md transition-opacity duration-300"
         style={{ opacity: animating ? 1 : 0 }}
       />
 
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
         <div
-          className="relative w-full max-w-md pointer-events-auto bg-white rounded-3xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.28)]"
+          className="relative w-full max-w-lg pointer-events-auto overflow-hidden rounded-[30px] bg-white shadow-[0_35px_100px_rgba(0,0,0,0.35)]"
           style={{
             opacity: animating ? 1 : 0,
             transform: animating
               ? "scale(1) translateY(0)"
-              : "scale(0.92) translateY(24px)",
+              : "scale(0.94) translateY(28px)",
             transition:
-              "opacity 0.35s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              "opacity 0.36s ease, transform 0.36s cubic-bezier(0.16, 1, 0.3, 1)",
           }}
         >
-          <div className="relative overflow-hidden bg-gradient-to-br from-purple-600 via-purple-700 to-slate-900 px-7 pt-8 pb-8">
-            <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full bg-white/10" />
-            <div className="absolute bottom-0 left-0 w-36 h-36 rounded-full bg-purple-950/25 translate-y-1/2 -translate-x-1/3" />
+          <div className="relative overflow-hidden bg-gradient-to-br from-violet-600 via-purple-700 to-slate-950 px-7 pt-8 pb-8">
+            <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-white/10 blur-sm" />
+            <div className="absolute left-0 bottom-0 h-40 w-40 -translate-x-1/3 translate-y-1/3 rounded-full bg-fuchsia-500/10" />
+            <div className="absolute right-16 top-14 h-16 w-16 rounded-full border border-white/10 bg-white/5" />
 
             <button
               onClick={handleClose}
-              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/15 hover:bg-white/25 transition-colors text-white"
-              aria-label="Close"
+              aria-label="Close popup"
+              className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white transition-colors hover:bg-white/25"
             >
-              <X className="w-4 h-4" />
+              <X className="h-4 w-4" />
             </button>
 
-            <div className="inline-flex items-center gap-1.5 bg-teal-400 text-white text-xs font-bold px-3 py-1 rounded-full mb-4">
-              <Zap className="w-3 h-3" />
-              LIMITED AVAILABILITY
+            <div className="inline-flex items-center gap-2 rounded-full bg-teal-400 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.16em] text-white mb-4">
+              <Sparkles className="h-3.5 w-3.5" />
+              Limited spots this week
             </div>
 
-            <h2 className="text-white text-3xl font-black leading-tight">
-              Need your website
-              <br />
-              launched fast?
+            <h2 className="max-w-md text-3xl sm:text-4xl font-black leading-[1.05] text-white">
+              Turn visitors into clients with a website that actually sells.
             </h2>
 
-            <p className="text-purple-100/85 text-sm leading-relaxed mt-3 max-w-sm">
-              We build modern business websites that look professional, load
-              fast, and help you turn visitors into real inquiries.
+            <p className="mt-4 max-w-md text-sm leading-relaxed text-white/78 sm:text-[15px]">
+              We create premium business websites that build trust fast, look
+              professional on every screen, and help people contact you sooner.
             </p>
 
-            <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-white/90 text-sm font-medium">
-              <Clock className="w-4 h-4 text-teal-300" />
-              Fast turnaround. Clear process. Reliable support.
+            <div className="mt-5 flex flex-wrap gap-2.5">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-sm font-medium text-white/90">
+                <Clock3 className="h-4 w-4 text-teal-300" />
+                Starts 5 seconds after page load
+              </div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-sm font-medium text-white/90">
+                <Zap className="h-4 w-4 text-violet-200" />
+                Fast turnaround
+              </div>
             </div>
           </div>
 
-          <div className="px-7 py-6">
-            <div className="rounded-2xl bg-gray-50 border border-gray-100 p-4 mb-6">
-              <div className="text-gray-900 font-bold text-base mb-1">
-                What you get
+          <div className="px-7 py-7">
+            <div className="mb-6 rounded-2xl border border-violet-100 bg-violet-50/60 p-4">
+              <div className="mb-1 text-base font-bold text-gray-900">
+                Why clients choose us
               </div>
-              <p className="text-gray-500 text-sm leading-relaxed">
-                A serious website presence for your business without the usual
-                delays, confusion, or low-quality template feel.
+              <p className="text-sm leading-relaxed text-gray-600">
+                No bloated process, no cheap-looking template feel, no waiting
+                forever — just a serious website for a serious business.
               </p>
             </div>
 
-            <ul className="space-y-3 mb-6">
+            <ul className="mb-7 space-y-3">
               {BENEFITS.map((item) => (
                 <li
                   key={item}
-                  className="flex items-start gap-2.5 text-sm text-gray-700"
+                  className="flex items-start gap-3 text-sm leading-relaxed text-gray-700"
                 >
-                  <div className="mt-0.5 w-4 h-4 rounded-full bg-teal-500 flex items-center justify-center flex-shrink-0">
-                    <CheckCircle2 className="w-3 h-3 text-white" />
+                  <div className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-teal-500">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-white" />
                   </div>
                   <span>{item}</span>
                 </li>
               ))}
             </ul>
 
-            <a href="/order-website" className="block" onClick={handleClose}>
-              <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white py-4 text-base font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 group">
-                Start your project
-                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </a>
+            <div className="space-y-3">
+              <Link
+                href="/order-website"
+                onClick={handleClose}
+                className="block"
+              >
+                <Button className="group h-auto w-full rounded-2xl bg-violet-600 px-6 py-4 text-base font-bold text-white shadow-lg transition-all duration-200 hover:bg-violet-700 hover:shadow-xl">
+                  Start your project now
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Button>
+              </Link>
 
-            <div className="flex items-center justify-center gap-2 mt-3 text-xs text-gray-500">
-              <Shield className="w-3.5 h-3.5 text-teal-500" />
-              Professional delivery with post-launch support
+              <div className="flex items-center justify-center gap-2 text-center text-xs text-gray-500">
+                <Shield className="h-3.5 w-3.5 text-teal-500" />
+                Professional delivery, clear communication, and post-launch
+                support
+              </div>
             </div>
           </div>
         </div>
