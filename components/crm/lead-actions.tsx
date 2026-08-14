@@ -1,199 +1,280 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { CheckCircle2, XCircle, Clock3, Briefcase, X } from "lucide-react";
+import {
+  Briefcase,
+  CheckCircle2,
+  ChevronDown,
+  Clock3,
+  MoreHorizontal,
+  X,
+  XCircle,
+} from "lucide-react";
 import {
   convertLeadToJob,
   updateLeadStatus,
 } from "@/app/(crm)/sales/leads/actions";
 
-type Lead = {
-  id: string;
-  company_name: string;
-  status: string;
+type LeadActionsProps = {
+  lead: {
+    id: string;
+    company_name: string;
+    status: string;
+  };
 };
 
-export default function LeadActions({ lead }: { lead: Lead }) {
-  const [isPending, startTransition] = useTransition();
+type StatusOption = {
+  label: string;
+  value: "pending" | "success" | "failed";
+  icon: typeof Clock3;
+  className: string;
+};
+
+const STATUS_OPTIONS: StatusOption[] = [
+  {
+    label: "Pending",
+    value: "pending",
+    icon: Clock3,
+    className: "border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100",
+  },
+  {
+    label: "Won",
+    value: "success",
+    icon: CheckCircle2,
+    className:
+      "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
+  },
+  {
+    label: "Lost",
+    value: "failed",
+    icon: XCircle,
+    className: "border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100",
+  },
+];
+
+function getDefaultProjectName(companyName: string) {
+  return `${companyName} website`;
+}
+
+export default function LeadActions({ lead }: LeadActionsProps) {
   const [open, setOpen] = useState(false);
+  const [convertOpen, setConvertOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
-  const [projectName, setProjectName] = useState(
-    `${lead.company_name} Website`,
-  );
-  const [projectType, setProjectType] = useState("business-website");
-  const [dealValue, setDealValue] = useState("");
-  const [depositPaid, setDepositPaid] = useState("");
-  const [deadline, setDeadline] = useState("");
-  const [error, setError] = useState("");
+  function changeStatus(status: "pending" | "success" | "failed") {
+    setError(null);
 
-  const submitStatus = (status: "pending" | "success" | "failed") => {
+    const formData = new FormData();
+    formData.set("leadId", lead.id);
+    formData.set("status", status);
+
     startTransition(async () => {
       try {
-        const formData = new FormData();
-        formData.append("leadId", lead.id);
-        formData.append("status", status);
         await updateLeadStatus(formData);
-      } catch (err: any) {
-        setError(err.message || "Failed to update status.");
+        setOpen(false);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Could not update lead status.",
+        );
       }
     });
-  };
+  }
 
-  const handleConvert = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  function handleConvert(formData: FormData) {
+    setError(null);
+    formData.set("leadId", lead.id);
 
     startTransition(async () => {
       try {
-        setError("");
-
-        const formData = new FormData();
-        formData.append("leadId", lead.id);
-        formData.append("projectName", projectName);
-        formData.append("projectType", projectType);
-        formData.append("dealValue", dealValue || "0");
-        formData.append("depositPaid", depositPaid || "0");
-        formData.append("deadline", deadline);
-
         await convertLeadToJob(formData);
+        setConvertOpen(false);
         setOpen(false);
-      } catch (err: any) {
-        setError(err.message || "Failed to convert lead.");
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Could not convert lead to job.",
+        );
       }
     });
-  };
+  }
 
   return (
     <>
-      <div className="flex flex-wrap gap-2">
+      <div className="relative">
         <button
-          onClick={() => submitStatus("pending")}
-          disabled={isPending}
-          className="inline-flex items-center gap-2 rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] text-amber-700"
+          type="button"
+          onClick={() => {
+            setError(null);
+            setOpen((current) => !current);
+          }}
+          title="Lead actions"
+          aria-label={`Actions for ${lead.company_name}`}
+          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition hover:border-violet-200 hover:bg-violet-50 hover:text-violet-700"
         >
-          <Clock3 className="h-3.5 w-3.5" />
-          Pending
+          <MoreHorizontal className="h-4 w-4" />
         </button>
 
-        <button
-          onClick={() => submitStatus("failed")}
-          disabled={isPending}
-          className="inline-flex items-center gap-2 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] text-rose-700"
-        >
-          <XCircle className="h-3.5 w-3.5" />
-          Failed
-        </button>
+        {open && (
+          <div className="absolute right-0 z-30 mt-2 w-52 rounded-2xl border border-gray-200 bg-white p-2 shadow-xl">
+            <p className="px-2 pb-2 pt-1 text-[10px] font-bold uppercase tracking-[0.12em] text-gray-400">
+              Update status
+            </p>
 
-        <button
-          onClick={() => setOpen(true)}
-          disabled={isPending}
-          className="inline-flex items-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs font-bold uppercase tracking-[0.12em] text-emerald-700"
-        >
-          <CheckCircle2 className="h-3.5 w-3.5" />
-          Convert
-        </button>
+            {STATUS_OPTIONS.map((option) => {
+              const Icon = option.icon;
+              const isCurrent = lead.status.toLowerCase() === option.value;
+
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  disabled={isPending || isCurrent}
+                  onClick={() => changeStatus(option.value)}
+                  className={`flex w-full items-center gap-2 rounded-xl border px-3 py-2 text-left text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${option.className}`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {isCurrent ? `${option.label} (current)` : option.label}
+                </button>
+              );
+            })}
+
+            <div className="my-2 border-t border-gray-100" />
+
+            <button
+              type="button"
+              disabled={isPending}
+              onClick={() => {
+                setError(null);
+                setConvertOpen(true);
+                setOpen(false);
+              }}
+              className="flex w-full items-center gap-2 rounded-xl bg-violet-600 px-3 py-2 text-left text-sm font-bold text-white transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Briefcase className="h-4 w-4" />
+              Convert to job
+            </button>
+
+            {error && (
+              <p className="mt-2 rounded-xl bg-rose-50 px-3 py-2 text-xs leading-relaxed text-rose-700">
+                {error}
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
-      {open ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-xl rounded-[28px] border border-black/5 bg-white p-6 shadow-[0_25px_80px_rgba(15,23,42,0.18)]">
+      {convertOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/45 p-4">
+          <div className="w-full max-w-lg rounded-[28px] bg-white p-6 shadow-2xl">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h3 className="text-2xl font-black tracking-tight text-gray-900">
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-violet-600">
+                  New job
+                </p>
+                <h2 className="mt-2 text-xl font-bold text-gray-900">
                   Convert lead to job
-                </h3>
-                <p className="mt-2 text-sm text-gray-500">
-                  Create a booked project from this lead and move it into
-                  delivery.
+                </h2>
+                <p className="mt-1 text-sm text-gray-500">
+                  Create a job for {lead.company_name} and mark this lead as
+                  won.
                 </p>
               </div>
 
               <button
-                onClick={() => setOpen(false)}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-gray-200 bg-white text-gray-500"
+                type="button"
+                onClick={() => setConvertOpen(false)}
+                disabled={isPending}
+                aria-label="Close conversion form"
+                className="rounded-xl p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
               >
-                <X className="h-4 w-4" />
+                <X className="h-5 w-5" />
               </button>
             </div>
 
-            <form onSubmit={handleConvert} className="mt-6 space-y-4">
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700">
+            <form action={handleConvert} className="mt-6 space-y-4">
+              <label className="block space-y-2">
+                <span className="text-sm font-semibold text-gray-700">
                   Project name
-                </label>
+                </span>
                 <input
-                  value={projectName}
-                  onChange={(e) => setProjectName(e.target.value)}
-                  className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-violet-300 focus:ring-4 focus:ring-violet-100"
+                  name="projectName"
                   required
+                  defaultValue={getDefaultProjectName(lead.company_name)}
+                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
                 />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700">
-                  Project type
-                </label>
-                <input
-                  value={projectType}
-                  onChange={(e) => setProjectType(e.target.value)}
-                  className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-violet-300 focus:ring-4 focus:ring-violet-100"
-                />
-              </div>
+              </label>
 
               <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
-                    Deal value
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={dealValue}
-                    onChange={(e) => setDealValue(e.target.value)}
-                    className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-violet-300 focus:ring-4 focus:ring-violet-100"
-                    placeholder="1500"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
-                    Deposit paid
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={depositPaid}
-                    onChange={(e) => setDepositPaid(e.target.value)}
-                    className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-violet-300 focus:ring-4 focus:ring-violet-100"
-                    placeholder="500"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700">
-                  Deadline
+                <label className="block space-y-2">
+                  <span className="text-sm font-semibold text-gray-700">
+                    Project type
+                  </span>
+                  <select
+                    name="projectType"
+                    defaultValue="business-website"
+                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
+                  >
+                    <option value="business-website">Business website</option>
+                    <option value="ecommerce">E-commerce website</option>
+                    <option value="landing-page">Landing page</option>
+                    <option value="web-app">Web application</option>
+                    <option value="seo">SEO / marketing</option>
+                    <option value="other">Other</option>
+                  </select>
                 </label>
-                <input
-                  type="date"
-                  value={deadline}
-                  onChange={(e) => setDeadline(e.target.value)}
-                  className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-violet-300 focus:ring-4 focus:ring-violet-100"
-                />
+
+                <label className="block space-y-2">
+                  <span className="text-sm font-semibold text-gray-700">
+                    Deadline
+                  </span>
+                  <input
+                    name="deadline"
+                    type="date"
+                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
+                  />
+                </label>
+
+                <label className="block space-y-2">
+                  <span className="text-sm font-semibold text-gray-700">
+                    Deal value
+                  </span>
+                  <input
+                    name="dealValue"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    defaultValue="0"
+                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
+                  />
+                </label>
+
+                <label className="block space-y-2">
+                  <span className="text-sm font-semibold text-gray-700">
+                    Deposit paid
+                  </span>
+                  <input
+                    name="depositPaid"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    defaultValue="0"
+                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
+                  />
+                </label>
               </div>
 
-              {error ? (
-                <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+              {error && (
+                <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
                   {error}
-                </div>
-              ) : null}
+                </p>
+              )}
 
-              <div className="flex items-center justify-end gap-3 pt-2">
+              <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"
-                  onClick={() => setOpen(false)}
-                  className="rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700"
+                  onClick={() => setConvertOpen(false)}
+                  disabled={isPending}
+                  className="rounded-xl px-4 py-3 text-sm font-semibold text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Cancel
                 </button>
@@ -201,16 +282,16 @@ export default function LeadActions({ lead }: { lead: Lead }) {
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="inline-flex items-center gap-2 rounded-2xl bg-violet-600 px-5 py-3 text-sm font-bold text-white shadow-[0_10px_25px_rgba(109,40,217,0.20)] transition-all hover:bg-violet-700 disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Briefcase className="h-4 w-4" />
-                  {isPending ? "Converting..." : "Create job"}
+                  {isPending ? "Creating..." : "Create job"}
                 </button>
               </div>
             </form>
           </div>
         </div>
-      ) : null}
+      )}
     </>
   );
 }
