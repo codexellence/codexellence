@@ -1643,38 +1643,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-20 px-4 bg-white">
-          <div className="container mx-auto max-w-6xl">
-            <div className="text-center mb-14">
-              <h2 className="text-4xl md:text-5xl font-black text-gray-900">
-                The technologies that power us
-              </h2>
-              <p className="text-gray-400 mt-3 text-sm">
-                Modern tools for fast, scalable, and visually strong websites
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-              {technologies.map((tech, i) => (
-                <div
-                  key={i}
-                  className="tech-card bg-gray-50 border border-gray-100 rounded-3xl p-6 flex flex-col items-center text-center"
-                >
-                  <div className="w-full h-20 flex items-center justify-center mb-4">
-                    <img
-                      src={tech.logo}
-                      alt={tech.name}
-                      className="max-h-full max-w-[80%] object-contain"
-                    />
-                  </div>
-                  <h3 className="font-bold text-gray-900 mb-1">{tech.name}</h3>
-                  <p className="text-gray-400 text-xs">{tech.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         <section className="py-20 px-4 bg-gradient-to-br from-white via-purple-50/60 to-indigo-50/40 relative overflow-hidden">
           <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[280px] rounded-full bg-violet-200/25 blur-3xl pointer-events-none" />
 
